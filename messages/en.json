@@ -1,0 +1,52 @@
+{
+  "common": {
+    "brand": "RailConnect",
+    "demo": "Academic demo",
+    "home": "Home",
+    "trains": "Find trains",
+    "myTrips": "My trips",
+    "track": "Track journey",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "createAccount": "Create account",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "theme": "Theme",
+    "search": "Search trains"
+  },
+  "home": {
+    "eyebrow": "A clearer way to plan rail journeys",
+    "headline": "Your next journey starts here.",
+    "subhead": "Compare sample schedules, choose your seats, and keep every trip in one place.",
+    "from": "From",
+    "to": "To",
+    "date": "Journey date",
+    "class": "Travel class",
+    "passengers": "Passengers",
+    "popularRoutes": "Popular sample routes",
+    "why": "Travel planning, made thoughtful",
+    "whySub": "A single, simple place for the details that matter before you board.",
+    "featureSearch": "Compare your options",
+    "featureSearchText": "Browse sample train times, journey duration, and fares together.",
+    "featureSeat": "Choose your seat",
+    "featureSeatText": "Explore a coach layout and map seats to each passenger.",
+    "featureTrip": "Keep plans together",
+    "featureTripText": "Find booking details and journey updates from your dashboard.",
+    "sampleNotice": "RailConnect is an academic demonstration. All schedules, availability, payments, tickets, and tracking are simulated; no real railway reservation is made."
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSub": "Sign in to manage your sample journeys.",
+    "registerTitle": "Create your account",
+    "registerSub": "Keep your sample bookings and passenger details together.",
+    "name": "Full name",
+    "email": "Email address",
+    "password": "Password",
+    "yourName": "Your name",
+    "passwordHint": "Use 12 or more characters.",
+    "loginPending": "Signing in…",
+    "registerPending": "Creating your account…",
+    "newHere": "New to RailConnect?",
+    "alreadyAccount": "Already have an account?"
+  }
+}

@@ -1,0 +1,18 @@
+"use client";
+
+import { useState } from "react";
+import { CircleAlert, ShieldCheck, UserRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+export type AdminUser = { id: string; name: string; email: string; role: string; isActive: boolean; createdAt: Date | string; _count: { bookings: number } };
+export function UserManager({ users: initial, currentAdminId }: { users: AdminUser[]; currentAdminId: string }) {
+  const [users, setUsers] = useState(initial); const [error, setError] = useState(""); const [busyId, setBusyId] = useState("");
+  async function update(user: AdminUser, data: { role?: string; isActive?: boolean }) {
+    setBusyId(user.id); setError("");
+    try { const response = await fetch("/api/admin/users", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: user.id, data }) }); const body = await response.json(); if (!response.ok) throw new Error(body.error ?? "User update failed."); setUsers((current) => current.map((item) => item.id === user.id ? { ...item, ...body.user } : item)); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "User update failed."); }
+    finally { setBusyId(""); }
+  }
+  return <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><p className="text-xs font-bold uppercase tracking-[.17em] text-orange-600">Administrator workspace</p><h1 className="mt-2 text-3xl font-semibold">User management</h1><p className="mt-2 text-sm text-slate-500">Review accounts, booking counts, administrator roles, and active access. Passwords are never exposed.</p>{error && <p role="alert" className="mt-4 flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-200"><CircleAlert size={16} />{error}</p>}<Card className="mt-6 overflow-hidden"><div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-950"><tr><th className="px-5 py-3">User</th><th className="px-5 py-3">Joined</th><th className="px-5 py-3">Bookings</th><th className="px-5 py-3">Role</th><th className="px-5 py-3">Access</th><th /></tr></thead><tbody>{users.map((user) => <tr key={user.id} className="border-t border-slate-100 dark:border-slate-800"><td className="px-5 py-3"><span className="flex items-center gap-2 font-medium"><UserRound size={15} className="text-slate-400" />{user.name}</span><span className="ml-6 text-xs text-slate-500">{user.email}</span></td><td className="px-5 py-3 text-xs text-slate-500">{new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(user.createdAt))}</td><td className="px-5 py-3">{user._count.bookings}</td><td className="px-5 py-3"><select aria-label={`Role for ${user.email}`} value={user.role} disabled={busyId === user.id || user.id === currentAdminId} onChange={(event) => void update(user, { role: event.target.value })} className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs dark:border-slate-700 dark:bg-slate-950"><option value="PASSENGER">Passenger</option><option value="ADMIN">Administrator</option></select>{user.role === "ADMIN" && <ShieldCheck size={14} className="ml-2 inline text-orange-600" />}</td><td className="px-5 py-3">{user.isActive ? "Active" : "Disabled"}</td><td className="px-5 py-3 text-right">{user.id !== currentAdminId && <Button size="sm" variant="ghost" disabled={busyId === user.id} onClick={() => void update(user, { isActive: !user.isActive })}>{user.isActive ? "Disable" : "Enable"}</Button>}</td></tr>)}</tbody></table></div>{!users.length && <p className="p-8 text-center text-sm text-slate-500">No accounts are registered.</p>}</Card></main>;
+}

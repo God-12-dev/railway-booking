@@ -1,0 +1,21 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { CheckCircle2, Download, Share2, TrainFront } from "lucide-react";
+import { BookingStatus } from "@/app/generated/prisma/client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { getSessionUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+type Search = Promise<{ bookingId?: string }>;
+export default async function BookingConfirmationPage({ searchParams }: { searchParams: Search }) {
+  const user = await getSessionUser();
+  if (!user) redirect("/login");
+  const { bookingId } = await searchParams; if (!bookingId) notFound();
+  const booking = await prisma.booking.findFirst({ where: { id: bookingId, userId: user.id }, include: { schedule: { include: { train: true, route: { include: { origin: true, destination: true } } } }, passengers: { orderBy: { createdAt: "asc" } }, seats: { where: { active: true }, include: { passenger: true, seat: { include: { coach: true } } } } } });
+  if (!booking || booking.status !== BookingStatus.CONFIRMED) notFound();
+  const seatByPassenger = new Map(booking.seats.map((entry) => [entry.passengerId, entry]));
+  return <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8"><Card className="overflow-hidden rounded-3xl"><div className="bg-[#0b1834] px-6 py-9 text-center text-white sm:px-10"><div className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-400/15 text-emerald-300"><CheckCircle2 size={30} /></div><p className="mt-4 text-xs font-bold uppercase tracking-[.18em] text-orange-200">Simulated payment successful</p><h1 className="mt-2 text-3xl font-semibold">Your demo booking is confirmed</h1><p className="mt-2 text-sm text-slate-300">Your sample seats are assigned and saved to your account.</p></div><div className="grid gap-7 p-6 sm:p-9"><div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-50 p-5 dark:bg-slate-950"><div><p className="text-xs font-bold uppercase tracking-wide text-slate-400">Simulated PNR</p><p className="mt-1 text-2xl font-bold tracking-[.12em] text-slate-950 dark:text-white">{booking.pnr}</p></div><Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">{booking.pnrStatus}</Badge></div><div className="grid gap-6 sm:grid-cols-2"><div><p className="text-xs font-bold uppercase tracking-wide text-slate-400">Journey</p><div className="mt-3 flex items-center gap-3"><TrainFront className="text-orange-600" size={20} /><div><p className="font-semibold">{booking.schedule.train.name}</p><p className="text-xs text-slate-500">{booking.schedule.train.number} · {booking.class.replace("_", " ")}</p></div></div><p className="mt-4 text-sm">{booking.schedule.route.origin.name} → {booking.schedule.route.destination.name}</p><p className="mt-1 text-xs text-slate-500">{new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "short" }).format(booking.journeyDate)}</p></div><div><p className="text-xs font-bold uppercase tracking-wide text-slate-400">Passengers and seats</p><div className="mt-2 divide-y divide-slate-100 dark:divide-slate-800">{booking.passengers.map((passenger) => { const assigned = seatByPassenger.get(passenger.id); return <div key={passenger.id} className="flex justify-between gap-3 py-3 text-sm"><span>{passenger.fullName} · {passenger.age}</span><span className="font-semibold">{assigned ? `${assigned.seat.coach.code}-${assigned.seat.number}` : "Seat pending"}</span></div>; })}</div></div></div><div className="flex flex-wrap gap-3 border-t border-slate-100 pt-6 dark:border-slate-800"><Button asChild><a href={`/api/tickets/${booking.id}/pdf`}><Download size={16} />Download PDF ticket</a></Button><Button asChild variant="secondary"><Link href="/dashboard"><Share2 size={16} />Booking history</Link></Button></div><div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-xs leading-5 text-orange-950 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-100">Academic demonstration: this confirmation, PNR, payment, and PDF are simulated. They are not valid for railway travel.</div></div></Card></main>;
+}
