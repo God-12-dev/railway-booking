@@ -1,4 +1,4 @@
-# RailConnect
+# railway-booking (RailConnect)
 
 RailConnect is an academic railway reservation demonstration. Sample schedules, availability, bookings, payments, PNRs, refunds, tracking, and food orders are simulated. It is not connected to IRCTC and does not create valid railway reservations.
 
